@@ -1,0 +1,22 @@
+name: Deploy to Production Server
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update and Start Discord Bot
+        uses: appleboy/ssh-action@v0.1.2
+        with:
+          host: ${{secrets.PROD_HOST}}
+          username: ${{secrets.PROD_USERNAME}}
+          password: ${{secrets.PROD_PASSWORD}}
+          port: ${{secrets.PROD_PORT}}
+          script: |
+            source /home/${{secrets.PROD_USERNAME}}/venv/bin/activate
+            python3 /home/${{secrets.PROD_USERNAME}}/service_stop.py
+            git --git-dir=/home/${{secrets.PROD_USERNAME}}/discord-bot/.git --work-tree=/home/${{secrets.PROD_USERNAME}}/discord-bot pull origin master
+            python3 /home/${{secrets.PROD_USERNAME}}/service_start.py
+            deactivate
