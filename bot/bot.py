@@ -8,7 +8,7 @@ dotenv.load_dotenv()
 
 class DiscordHandler:
     def __init__(self):
-        intents = discord.Intents.default()
+        intents = discord.Intents.all()
         self.client = discord.Client(intents=intents)
 
         """
@@ -22,6 +22,11 @@ class DiscordHandler:
         @self.client.event
         async def on_message(message: discord.message.Message) -> None:
             print("Discord bot received a message!")
+            if message.clean_content[0:5].lower() == "!etn ":
+                command = message.clean_content[5:]
+                print(f"Received Command: `{command}`")
+                if command.lower() == "ping":
+                    await message.channel.send("Pong!")
 
         @self.client.event
         async def on_raw_reaction_add(payload: discord.raw_models.RawReactionActionEvent) -> None:
