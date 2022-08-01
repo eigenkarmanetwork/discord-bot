@@ -1,4 +1,3 @@
-from database_migration.update import update_database
 import os
 import sqlite3
 import threading
@@ -11,7 +10,6 @@ class DatabaseManager:
         self.connected = False
         self.conn = None
         self.cur = None
-        update_database(self)
 
     def open(self) -> None:
         self.lock.acquire()
