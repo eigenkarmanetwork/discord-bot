@@ -18,7 +18,7 @@
                 var nonce = getUrlParameters()["nonce"];
                 var data = {"username": username, "password": password, "id": id, "nonce": nonce};
 
-                var xhttp = new HMLHttpRequest();
+                var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function(){
                     if(this.readyState == 4 && this.status == 200){
                         document.getElementById("notice").innerHTML = "Success";
