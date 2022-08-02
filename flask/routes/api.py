@@ -1,5 +1,5 @@
 from database import DatabaseManager
-from flask import redirect, Response, url_for
+from flask import redirect, request, Response, url_for
 import dotenv
 import os
 import requests
