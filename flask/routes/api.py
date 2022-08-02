@@ -16,7 +16,7 @@ def authorize_discord() -> Response:
         "client_secret": os.getenv("DISCORD_CLIENT_SECRET"),
         "grant_type": "authorization_code",
         "code": discord_code,
-        "redirect_url": "http://discord.eigentrust.net/authorize_discord",
+        "redirect_uri": "http://discord.eigentrust.net/authorize_discord",
     }
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
