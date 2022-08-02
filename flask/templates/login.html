@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Login</title>
+        <script>
+            function getUrlParameters() {
+                var out = {};
+                var str = window.location.search.replace("?", "");
+                var subs = str.split(`&`).map((si)=>{var keyVal = si.split(`=`); out[keyVal[0]]=keyVal[1];});
+                return out;
+            }
+
+            function login(){
+                var username = document.getElementById("username").value;
+                var password = document.getElementById("password").value;
+                var id = getUrlParameters()["id"];
+                var nonce = getUrlParameters()["nonce"];
+                var data = {"username": username, "password": password, "id": id, "nonce": nonce};
+
+                var xhttp = new HMLHttpRequest();
+                xhttp.onreadystatechange = function(){
+                    if(this.readyState == 4 && this.status == 200){
+                        document.getElementById("notice").innerHTML = "Success";
+                        document.getElementById("notice").style = "color: green;";
+                        var data = JSON.parse(this.responseText);
+                        key = data["password"];
+                        key_type = data["password_type"];
+                        document.location.href = "/connected.html";
+                    }else if(this.readyState == 4 && this.status == 403){
+                        document.getElementByID("notice").innerHTML = this.responseText;
+                        document.getElementById("notice").style = "color: red;";
+                    }else if(this.readyState == 4 && this.status == 404){
+                        document.getElementByID("notice").innerHTML = this.responseText;
+                        document.getElementByID("notice").innerHTML += " <a href='https://discord.com/api/oauth2/authorize?client_id=999817950880075949&redirect_uri=http%3A%2F%2Fdiscord.eigentrust.net%2Fauthorize_discord&response_type=code&scope=identify'>Click here to restart.</a>";
+                        document.getElementById("notice").style = "color: red;";
+                    }else if(this.readyState == 4) {
+                        document.getElementByID("notice").innerHTML = "An unknown error occurred...";
+                        document.getElementById("notice").style = "color: red;";
+                    }
+                }
+                xhttp.open("POST", "http://discord.eigentrust.net/connect", true);
+                xhttp.setRequestHeader("Content-type", "application/json");
+                xhttp.setRequestHeader("Accept", "text/plain");
+                xhttp.send(JSON.stringify(data));
+            }
+        </script>
+    </head>
+    <body>
+        {% extends "template.html" %}
+        {% block content %}
+
+        <p>Would you like to pair ETN and Discord?  If so, please sign in:</p>
+        <span id="notice"></span>
+        <table>
+            <tr>
+                <td>Username:</td>
+                <td><input id="username" type="text"></td>
+            </tr>
+            <tr>
+                <td>Password:</td>
+                <td><input id="password" type="password"></td>
+            </tr>
+        </table>
+        <button id="login" onclick="javascript:login()">Connect Discord</button>
+          
+        {% endblock %}
+    </body>
+</html>
