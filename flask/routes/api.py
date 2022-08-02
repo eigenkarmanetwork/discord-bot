@@ -82,8 +82,15 @@ def connect() -> Response:
 
     with DatabaseManager() as db:
         db.execute("DELETE FROM pending_connections WHERE id=:id", {"id": id})
-        db.execute(
-            "INSERT INTO connections (id, key, key_type, expires) VALUES (?, ?, ?, ?)",
-            (id, key, key_type, expires),
-        )
+        result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": id})
+        if result.fetchone():
+            db.execute(
+                "UPDATE connections SET id=:id, key=:key, key_type=:key_type, expires=:expires",
+                {"id": id, "key": key, "key_type": key_type, "expires": expires}
+            )
+        else:
+            db.execute(
+                "INSERT INTO connections (id, key, key_type, expires) VALUES (?, ?, ?, ?)",
+                (id, key, key_type, expires),
+            )
     return Response("Success.", 200)
