@@ -23,9 +23,6 @@
                     if(this.readyState == 4 && this.status == 200){
                         document.getElementById("notice").innerHTML = "Success";
                         document.getElementById("notice").style = "color: green;";
-                        var data = JSON.parse(this.responseText);
-                        key = data["password"];
-                        key_type = data["password_type"];
                         document.location.href = "/connected.html";
                     }else if(this.readyState == 4 && this.status == 403){
                         document.getElementById("notice").innerHTML = this.responseText;
