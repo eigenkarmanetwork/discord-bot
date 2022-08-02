@@ -28,14 +28,14 @@
                         key_type = data["password_type"];
                         document.location.href = "/connected.html";
                     }else if(this.readyState == 4 && this.status == 403){
-                        document.getElementByID("notice").innerHTML = this.responseText;
+                        document.getElementById("notice").innerHTML = this.responseText;
                         document.getElementById("notice").style = "color: red;";
                     }else if(this.readyState == 4 && this.status == 404){
-                        document.getElementByID("notice").innerHTML = this.responseText;
-                        document.getElementByID("notice").innerHTML += " <a href='https://discord.com/api/oauth2/authorize?client_id=999817950880075949&redirect_uri=http%3A%2F%2Fdiscord.eigentrust.net%2Fauthorize_discord&response_type=code&scope=identify'>Click here to restart.</a>";
+                        document.getElementById("notice").innerHTML = this.responseText;
+                        document.getElementById("notice").innerHTML += " <a href='https://discord.com/api/oauth2/authorize?client_id=999817950880075949&redirect_uri=http%3A%2F%2Fdiscord.eigentrust.net%2Fauthorize_discord&response_type=code&scope=identify'>Click here to restart.</a>";
                         document.getElementById("notice").style = "color: red;";
                     }else if(this.readyState == 4) {
-                        document.getElementByID("notice").innerHTML = "An unknown error occurred...";
+                        document.getElementById("notice").innerHTML = "An unknown error occurred...";
                         document.getElementById("notice").style = "color: red;";
                     }
                 }
@@ -44,9 +44,24 @@
                 xhttp.setRequestHeader("Accept", "text/plain");
                 xhttp.send(JSON.stringify(data));
             }
+
+            function addListeners(){
+                var username = document.getElementById("username")
+                var password = document.getElementById("password")
+
+                function click(event){
+                    if(event.key === "Enter"){
+                        event.preventDefault();
+                        document.getElementById("login").click();
+                    }
+                }
+
+                username.addEventListener("keypress", click);
+                password.addEventListener("keypress", click);
+            }
         </script>
     </head>
-    <body>
+    <body onload="javascript:addListners();">
         {% extends "template.html" %}
         {% block content %}
 
