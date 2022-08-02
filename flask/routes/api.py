@@ -8,6 +8,7 @@ import time
 
 dotenv.load_dotenv()
 
+
 def authorize_discord() -> Response:
     discord_code = request.args["code"]
     data = {
@@ -15,6 +16,7 @@ def authorize_discord() -> Response:
         "client_secret": os.getenv("DISCORD_CLIENT_SECRET"),
         "grant_type": "authorization_code",
         "code": discord_code,
+        "redirect_url": "http://discord.eigentrust.net/authorize_discord",
     }
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -34,5 +36,8 @@ def authorize_discord() -> Response:
     expires = int(time.time()) + (60 * 15)  # Expires in 15 minutes
     with DatabaseManager() as db:
         db.execute("DELETE FROM pending_connections WHERE id=:id", {"id": response["id"]})
-        db.execute("INSERT INTO pending_connections (id, nonce, expires) VALUES (?, ?, ?)", (response["id"], nonce, expires))
+        db.execute(
+            "INSERT INTO pending_connections (id, nonce, expires) VALUES (?, ?, ?)",
+            (response["id"], nonce, expires),
+        )
     return redirect("/login")
