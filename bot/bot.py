@@ -63,6 +63,10 @@ class DiscordHandler:
                 if command.lower() == "ping":
                     await message.channel.send("Pong!")
 
+                elif command.lower() == "about":
+                    await message.channel.send("EigenTrust.Net is your own personal karma system, letting you see what the people you trust think of others. You can allocate trust of different flavors to people using Discord reacts when they do something which you think is good and makes you want to upweight them in the trust graph, both from your personal point of view and from the view of anyone who trusts you.")
+                    return
+
                 elif command.lower() == "add_trust_react":
                     if not admin:
                         await message.channel.send(f"Error: Only server administrators can use this command.")
@@ -146,7 +150,7 @@ class DiscordHandler:
                             case _:
                                 await message.channel.send(f"No help for: `{args[0]}`")
                     elif len(args) == 0:
-                        await message.channel.send("Commands:\n\nadd_trust_react\nremove_trust_react\nlist_trust_reacts\nping\nhelp")
+                        await message.channel.send("Commands:\n\nabout\nadd_trust_react\nremove_trust_react\nlist_trust_reacts\nping\nhelp")
                     else:
                         await message.channel.send("Cannot provide help for multiple commands at once.")
                 else:
