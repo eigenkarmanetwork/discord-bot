@@ -1,7 +1,6 @@
-"""from database_migration.versions import (
-    v0_1_0,
+from database_migration.versions import (
+    v0_2_0,
 )
-"""
 from typing import TYPE_CHECKING
 import warnings
 
@@ -10,6 +9,7 @@ if TYPE_CHECKING:
 
 main_database_versions = {
     "0.1.0": None,
+    "0.2.0": v0_2_0.update,
 }
 
 
