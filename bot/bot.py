@@ -74,6 +74,10 @@ class DiscordHandler:
                     if len(args) != 2:
                         await message.channel.send(f"Error: Expected 2 arguments, got {len(args)}")
                         return
+                    emojis = [str(e) for e in message.guild.emojis]
+                    if args[0] not in emojis:
+                        await message.channel.send(f"Error: {args[0]} is not an emoji.")
+                        return
                     r = requests.get("http://www.eigentrust.net:31415/categories")
                     categories = json.loads(r.text)
                     if args[1].lower() not in categories:
