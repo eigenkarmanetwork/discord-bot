@@ -280,6 +280,7 @@ class DiscordHandler:
                         + f"http://discord.eigentrust.net/vote?voter={voter_id}&votee={votee_id}"
                         + f"&message={payload.message_id} to vote",
                     )
+                    return
                 assert r.status_code == 200
                 data = json.loads(r.text)
                 password = data["password"]
