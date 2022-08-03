@@ -1,4 +1,5 @@
 discord-py
+emojis
 flask
 gunicorn
 python-dotenv

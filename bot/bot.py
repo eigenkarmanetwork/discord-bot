@@ -2,6 +2,7 @@ from database import DatabaseManager
 from helpers import join_message
 import discord
 import dotenv
+import emojis
 import json
 import os
 import requests
@@ -74,8 +75,8 @@ class DiscordHandler:
                     if len(args) != 2:
                         await message.channel.send(f"Error: Expected 2 arguments, got {len(args)}")
                         return
-                    emojis = [str(e) for e in message.guild.emojis]
-                    if args[0] not in emojis:
+                    custom_emojis = [str(e) for e in message.guild.emojis]
+                    if args[0] not in custom_emojis and emojis.count(args[0]) == 0:
                         await message.channel.send(f"Error: {args[0]} is not an emoji.")
                         return
                     r = requests.get("http://www.eigentrust.net:31415/categories")
