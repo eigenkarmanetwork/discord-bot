@@ -69,7 +69,9 @@ def connect() -> Response:
     headers = {
         "Content-Type": "application/json",
     }
-    r = requests.post("http://www.eigentrust.net:31415/register_connection", data=json.dumps(data), headers=headers)
+    r = requests.post(
+        "http://www.eigentrust.net:31415/register_connection", data=json.dumps(data), headers=headers
+    )
     if r.status_code != 200:
         return Response(r.text, r.status_code)
     response = json.loads(r.text)
@@ -92,3 +94,35 @@ def connect() -> Response:
                 (id, key, key_type, expires),
             )
     return Response("Success.", 200)
+
+
+def cast_vote() -> Response:
+    password, voter_id, votee_id, message_id = get_params(["password", "voter_id", "votee_id", "message_id"])
+    with DatabaseManager() as db:
+        result = db.execute(
+            "SELECT * FROM pending_votes WHERE voter_id=:voter_id AND votee_id=:votee_id AND message_id=:message_id",
+            {"voter_id": voter_id, "votee_id": votee_id, "message_id": message_id},
+        )
+        vote_row = result.fetchone()
+        if not vote_row:
+            return Response("Vote does not exist, has it already been authorized?", 404)
+    data = {
+        "service_name": os.getenv("ETN_SERVICE_NAME"),
+        "service_key": os.getenv("ETN_SERVICE_KEY"),
+        "to": votee_id,
+        "from": voter_id,
+        "password": password,
+        "password_type": "raw_password",
+    }
+    headers = {
+        "Content-Type": "application/json",
+    }
+    r = requests.post("http://www.eigentrust.net:31415/vote", data=json.dumps(data), headers=headers)
+    if r.status_code != 200:
+        return Response(r.text, r.status_code)
+    with DatabaseManager() as db:
+        db.execute(
+            "DELETE FROM pending_votes WHERE voter_id=:voter_id AND votee_id=:votee_id AND message_id=:message_id",
+            {"voter_id": voter_id, "votee_id": votee_id, "message_id": message_id},
+        )
+    return Response(r.text, r.status_code)

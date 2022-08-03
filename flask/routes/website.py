@@ -17,3 +17,11 @@ def login() -> Response:
 
 def connected() -> Response:
     return render_template("connected.html")
+
+
+def vote() -> Response:
+    return render_template("vote.html")
+
+
+def voted() -> Response:
+    return render_template("voted.html")

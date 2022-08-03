@@ -11,7 +11,9 @@ async def join_message(guild: discord.guild.Guild) -> None:
     if not use_channel:
         use_channel = channels[0]
 
-    await use_channel.send("Thank you for adding the ETN Discord Bot!\nPlease use `!etn add_trust_react <emoji> <flavor>` to configure your server.")
+    await use_channel.send(
+        "Thank you for adding the ETN Discord Bot!\nPlease use `!etn add_trust_react <emoji> <flavor>` to configure your server."
+    )
 
 
 async def send_dm(member: discord.abc.User, msg: str) -> None:

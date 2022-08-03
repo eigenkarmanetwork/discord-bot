@@ -58,7 +58,11 @@ class DiscordHandler:
         @self.client.event
         async def on_message(message: discord.message.Message) -> None:
             if message.clean_content[0:5].lower() == "!etn ":
-                admin = message.author.guild_permissions.administrator
+                is_dm = False
+                admin = False
+                if not isinstance(message.channel, discord.channel.DMChannel):
+                    is_dm = True
+                    admin = message.author.guild_permissions.administrator
                 raw_command = shlex.split(message.clean_content[5:])
                 command = raw_command[0]
                 args = raw_command[1:]
@@ -73,6 +77,9 @@ class DiscordHandler:
                     return
 
                 elif command.lower() == "add_trust_react":
+                    if is_dm:
+                        await message.channel.send("Error: You can only use this command in a server.")
+                        return
                     if not admin:
                         await message.channel.send("Error: Only server administrators can use this command.")
                         return
@@ -105,6 +112,9 @@ class DiscordHandler:
                     await message.channel.send(response)
 
                 elif command.lower() == "list_trust_reacts":
+                    if is_dm:
+                        await message.channel.send("Error: You can only use this command in a server.")
+                        return
                     with DatabaseManager() as db:
                         result = db.execute("SELECT * FROM guilds WHERE id=:id", {"id": message.guild.id})
                         row = result.fetchone()
@@ -116,6 +126,9 @@ class DiscordHandler:
                     await message.channel.send(response)
 
                 elif command.lower() in ["remove_trust_react", "delete_trust_react"]:
+                    if is_dm:
+                        await message.channel.send("Error: You can only use this command in a server.")
+                        return
                     if not admin:
                         await message.channel.send("Error: Only server administrators can use this command.")
                         return
@@ -218,7 +231,7 @@ class DiscordHandler:
                         await send_dm(
                             payload.member,
                             f"Unable to vote for {votee_name}.  "
-                            + "They have not connected their Discord to the ETN."
+                            + "They have not connected their Discord to the ETN.",
                         )
                     else:
                         db.execute(
@@ -293,7 +306,9 @@ class DiscordHandler:
                     "http://www.eigentrust.net:31415/vote", data=json.dumps(data), headers=headers
                 )
                 if r.status_code != 200:
-                    await send_dm(payload.member, f"Error casting vote: `{r.text}` Error Code: `{r.status_code}`.")
+                    await send_dm(
+                        payload.member, f"Error casting vote: `{r.text}` Error Code: `{r.status_code}`."
+                    )
                     return
 
         @self.client.event

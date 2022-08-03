@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Cast Vote</title>
+        <script>
+            function getUrlParameters() {
+                var out = {};
+                var str = window.location.search.replace("?", "");
+                var subs = str.split(`&`).map((si)=>{var keyVal = si.split(`=`); out[keyVal[0]]=keyVal[1];});
+                return out;
+            }
+
+            function vote(){
+                var password = document.getElementById("password").value;
+                var voter_id = getUrlParameters()["voter_id"];
+                var votee_id = getUrlParameters()["votee_id"];
+                var message = getUrlParameters()["message"];
+                var data = {"password": password, "voter_id": voter_id, "votee_id": votee_id, "message": message};
+
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function(){
+                    if(this.readyState == 4 && this.status == 200){
+                        document.getElementById("notice").innerHTML = "Success";
+                        document.getElementById("notice").style = "color: green;";
+                        document.location.href = "/voted.html";
+                    }else if(this.readyState == 4 && this.status == 403){
+                        document.getElementById("notice").innerHTML = this.responseText;
+                        document.getElementById("notice").style = "color: red;";
+                    }else if(this.readyState == 4 && this.status == 404){
+                        document.getElementById("notice").innerHTML = this.responseText;
+                        document.getElementById("notice").style = "color: red;";
+                    }else if(this.readyState == 4) {
+                        document.getElementById("notice").innerHTML = "An unknown error occurred...";
+                        document.getElementById("notice").style = "color: red;";
+                    }
+                }
+                xhttp.open("POST", "http://discord.eigentrust.net/cast_vote", true);
+                xhttp.setRequestHeader("Content-type", "application/json");
+                xhttp.setRequestHeader("Accept", "text/plain");
+                xhttp.send(JSON.stringify(data));
+            }
+
+            function addListeners(){
+                var password = document.getElementById("password")
+
+                function click(event){
+                    if(event.key === "Enter"){
+                        event.preventDefault();
+                        document.getElementById("vote").click();
+                    }
+                }
+
+                password.addEventListener("keypress", click);
+            }
+        </script>
+    </head>
+    <body onload="javascript:addListeners();">
+        {% extends "template.html" %}
+        {% block content %}
+
+        <p>Would you like to cast this vote?  If so, please enter your password:</p>
+        <span id="notice"></span>
+        <table>
+            <tr>
+                <td>Password:</td>
+                <td><input id="password" type="password"></td>
+            </tr>
+        </table>
+        <button id="vote" onclick="javascript:vote()">Cast Vote</button>
+          
+        {% endblock %}
+    </body>
+</html>

@@ -51,7 +51,9 @@ class DatabaseManager:
         conn = sqlite3.connect(self.path)
         cur = conn.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS bot_settings (setting TEXT PRIMARY KEY UNIQUE, value TEXT)")
-        cur.execute("CREATE TABLE IF NOT EXISTS guilds (id INTEGER PRIMARY KEY UNIQUE, name TEXT, reactions TEXT)")
+        cur.execute(
+            "CREATE TABLE IF NOT EXISTS guilds (id INTEGER PRIMARY KEY UNIQUE, name TEXT, reactions TEXT)"
+        )
         conn.commit()
         cur.execute("INSERT INTO bot_settings (setting, value) VALUES ('version', '0.1.0')")
         conn.commit()
