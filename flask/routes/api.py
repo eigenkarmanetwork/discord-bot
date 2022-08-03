@@ -84,10 +84,8 @@ def connect() -> Response:
         db.execute("DELETE FROM pending_connections WHERE id=:id", {"id": id})
         result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": id})
         if result.fetchone():
-            db.execute(
-                "UPDATE connections SET id=:id, key=:key, key_type=:key_type, expires=:expires",
-                {"id": id, "key": key, "key_type": key_type, "expires": expires}
-            )
+            db.execute("DELETE FROM connections WHERE id=:id", {"id": id})
+            db.commit()
         else:
             db.execute(
                 "INSERT INTO connections (id, key, key_type, expires) VALUES (?, ?, ?, ?)",
