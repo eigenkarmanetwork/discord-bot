@@ -188,6 +188,15 @@ class DiscordHandler:
                 if voter_id == votee_id:
                     print("User cannot vote for themselves.")
                     return None
+                result = db.execute("SELECT * FROM guilds WHERE id=:id", {"id": payload.guild_id})
+                row = result.fetchone()
+                if not row:
+                    print("Server is not connected?")
+                    return
+                reacts = json.loads(row["reactions"])
+                if str(payload.emoji) not in reacts:
+                    print("Not a trust reaction")
+                    return
                 result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": voter_id})
                 row = result.fetchone()
                 if not row:
@@ -227,15 +236,6 @@ class DiscordHandler:
                                 + "register.  If you do have an account, and would like to link your "
                                 + "Discord, please go to http://discord.eigentrust.net/",
                             )
-                    return
-                result = db.execute("SELECT * FROM guilds WHERE id=:id", {"id": payload.guild_id})
-                row = result.fetchone()
-                if not row:
-                    print("Server is not connected?")
-                    return
-                reacts = json.loads(row["reactions"])
-                if str(payload.emoji) not in reacts:
-                    print("Not a trust reaction")
                     return
 
                 data = {
