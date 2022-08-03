@@ -13,8 +13,8 @@
 
             function vote(){
                 var password = document.getElementById("password").value;
-                var voter_id = getUrlParameters()["voter_id"];
-                var votee_id = getUrlParameters()["votee_id"];
+                var voter_id = getUrlParameters()["voter"];
+                var votee_id = getUrlParameters()["votee"];
                 var message = getUrlParameters()["message"];
                 var data = {"password": password, "voter_id": voter_id, "votee_id": votee_id, "message": message};
 
