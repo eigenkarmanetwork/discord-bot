@@ -1,11 +1,12 @@
 from database import DatabaseManager
-from helpers import join_message, send_dm
+from helpers import is_admin, join_message, send_dm
 import asyncio
 import discord
 import dotenv
 import emojis
 import json
 import os
+import re
 import requests
 import shlex
 import time
@@ -62,8 +63,8 @@ class DiscordHandler:
                 admin = False
                 if not isinstance(message.channel, discord.channel.DMChannel):
                     is_dm = False
-                    admin = message.author.guild_permissions.administrator
-                raw_command = shlex.split(message.clean_content[5:])
+                    admin = is_admin(message.author)
+                raw_command = shlex.split(message.content[5:])
                 command = raw_command[0]
                 args = raw_command[1:]
                 print(f"Received Command: `{command}`")
@@ -76,12 +77,99 @@ class DiscordHandler:
                     )
                     return
 
+                elif command.lower() == "add_admin_role":
+                    if is_dm:
+                        await message.channel.send("Error: You can only use this command in a server.")
+                        return
+                    if not admin:
+                        await message.channel.send("Error: Only server and bot administrators can use this command.")
+                        return
+                    if len(args) != 1:
+                        await message.channel.send(f"Error: Expected 1 argument, got {len(args)}")
+                        return
+                    is_valid_role = re.search("<@&[0-9]+>", args[0])
+                    args[0] = is_valid_role[0]
+                    if not is_valid_role:
+                        print(f"Error got invalid role: {args[0]}")
+                        await message.channel.send(f"Error: First argument must be a @role")
+                        return
+                    args[0] = is_valid_role[0]
+                    with DatabaseManager() as db:
+                        result = db.execute("SELECT * FROM guilds WHERE id=:id", {"id": message.guild.id})
+                        row = result.fetchone()
+                        assert row is not None
+                        guild_admin_roles = json.loads(row["admin_roles"])
+                        if args[0] not in guild_admin_roles:
+                            guild_admin_roles.append(args[0])
+                            new_roles = json.dumps(guild_admin_roles)
+                            db.execute(
+                                "UPDATE guilds SET admin_roles=:admin_roles WHERE id=:id",
+                                {"admin_roles": new_roles, "id": message.guild.id},
+                            )
+                    response = "New admin roles:"
+                    for role in guild_admin_roles:
+                        response += f"\n{role}"
+                    await message.channel.send(response)
+
+                elif command.lower() in ["remove_admin_role", "delete_admin_role"]:
+                    if is_dm:
+                        await message.channel.send("Error: You can only use this command in a server.")
+                        return
+                    if not admin:
+                        await message.channel.send("Error: Only server and bot administrators can use this command.")
+                        return
+                    if len(args) != 1:
+                        await message.channel.send(f"Error: Expected 1 argument, got {len(args)}")
+                        return
+                    is_valid_role = re.search("<@&[0-9]+>", args[0])
+                    args[0] = is_valid_role[0]
+                    if not is_valid_role:
+                        print(f"Error got invalid role: {args[0]}")
+                        await message.channel.send(f"Error: First argument must be a @role")
+                        return
+                    with DatabaseManager() as db:
+                        result = db.execute("SELECT * FROM guilds WHERE id=:id", {"id": message.guild.id})
+                        row = result.fetchone()
+                        assert row is not None
+                        guild_admin_roles = json.loads(row["admin_roles"])
+                        if args[0] not in guild_admin_roles:
+                            await message.channel.send(f"{args[0]} is not an admin bot role.")
+                            return
+                        guild_admin_roles.remove(args[0])
+                        new_roles = json.dumps(guild_admin_roles)
+                        db.execute(
+                            "UPDATE guilds SET admin_roles=:admin_roles WHERE id=:id",
+                            {"admin_roles": new_roles, "id": message.guild.id},
+                        )
+                    response = "New admin roles:"
+                    for role in guild_admin_roles:
+                        response += f"\n{role}"
+                    if not guild_admin_roles:
+                        response += "\nEigenAdmin"
+                    await message.channel.send(response)
+
+                elif command.lower() == "list_admin_roles":
+                    if is_dm:
+                        await message.channel.send("Error: You can only use this command in a server.")
+                        return
+                    with DatabaseManager() as db:
+                        result = db.execute("SELECT * FROM guilds WHERE id=:id", {"id": message.guild.id})
+                        row = result.fetchone()
+                        assert row is not None
+                        guild_admin_roles = json.loads(row["admin_roles"])
+                    response = "Current admin roles:"
+                    for role in guild_admin_roles:
+                        response += f"\n{role}"
+                    if not guild_admin_roles:
+                        response += "\nEigenAdmin"
+                    await message.channel.send(response)
+
                 elif command.lower() == "add_trust_react":
                     if is_dm:
                         await message.channel.send("Error: You can only use this command in a server.")
                         return
                     if not admin:
-                        await message.channel.send("Error: Only server administrators can use this command.")
+                        await message.channel.send("Error: Only server and bot administrators can use this command.")
                         return
                     if len(args) != 2:
                         await message.channel.send(f"Error: Expected 2 arguments, got {len(args)}")
@@ -123,6 +211,8 @@ class DiscordHandler:
                     response = "Current trust reactions:"
                     for react in guild_reacts:
                         response += f"\n{react}: {guild_reacts[react]}"
+                    if not guild_reacts:
+                        response += "\nNo reactions configured."
                     await message.channel.send(response)
 
                 elif command.lower() in ["remove_trust_react", "delete_trust_react"]:
@@ -130,7 +220,7 @@ class DiscordHandler:
                         await message.channel.send("Error: You can only use this command in a server.")
                         return
                     if not admin:
-                        await message.channel.send("Error: Only server administrators can use this command.")
+                        await message.channel.send("Error: Only server and bot administrators can use this command.")
                         return
                     if len(args) != 1:
                         await message.channel.send(f"Error: Expected 1 arguments, got {len(args)}")
@@ -152,6 +242,8 @@ class DiscordHandler:
                     response = "New reactions:"
                     for react in guild_reacts:
                         response += f"\n{react}: {guild_reacts[react]}"
+                    if not guild_reacts:
+                        response += "\nNo reactions configured."
                     await message.channel.send(response)
 
                 elif command.lower() == "help":
