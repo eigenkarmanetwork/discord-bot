@@ -2,6 +2,7 @@ from database_migration.versions import (
     v0_2_0,
     v0_2_1,
     v0_3_0,
+    v0_4_0,
 )
 from typing import TYPE_CHECKING
 import warnings
@@ -14,6 +15,7 @@ main_database_versions = {
     "0.2.0": v0_2_0.update,
     "0.2.1": v0_2_1.update,
     "0.3.0": v0_3_0.update,
+    "0.4.0": v0_4_0.update,
 }
 
 
