@@ -1,5 +1,5 @@
 from database import DatabaseManager
-from helpers import join_message, send_dm
+from helpers import is_admin, join_message, send_dm
 import asyncio
 import discord
 import dotenv
@@ -62,7 +62,7 @@ class DiscordHandler:
                 admin = False
                 if not isinstance(message.channel, discord.channel.DMChannel):
                     is_dm = False
-                    admin = message.author.guild_permissions.administrator
+                    admin = is_admin(message.author)
                 raw_command = shlex.split(message.clean_content[5:])
                 command = raw_command[0]
                 args = raw_command[1:]
@@ -81,7 +81,7 @@ class DiscordHandler:
                         await message.channel.send("Error: You can only use this command in a server.")
                         return
                     if not admin:
-                        await message.channel.send("Error: Only server administrators can use this command.")
+                        await message.channel.send("Error: Only server and bot administrators can use this command.")
                         return
                     if len(args) != 2:
                         await message.channel.send(f"Error: Expected 2 arguments, got {len(args)}")
@@ -130,7 +130,7 @@ class DiscordHandler:
                         await message.channel.send("Error: You can only use this command in a server.")
                         return
                     if not admin:
-                        await message.channel.send("Error: Only server administrators can use this command.")
+                        await message.channel.send("Error: Only server and bot administrators can use this command.")
                         return
                     if len(args) != 1:
                         await message.channel.send(f"Error: Expected 1 arguments, got {len(args)}")
