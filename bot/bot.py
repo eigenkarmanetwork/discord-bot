@@ -58,10 +58,10 @@ class DiscordHandler:
         @self.client.event
         async def on_message(message: discord.message.Message) -> None:
             if message.clean_content[0:5].lower() == "!etn ":
-                is_dm = False
+                is_dm = True
                 admin = False
                 if not isinstance(message.channel, discord.channel.DMChannel):
-                    is_dm = True
+                    is_dm = False
                     admin = message.author.guild_permissions.administrator
                 raw_command = shlex.split(message.clean_content[5:])
                 command = raw_command[0]
