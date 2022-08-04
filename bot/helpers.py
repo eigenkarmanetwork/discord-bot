@@ -25,9 +25,9 @@ async def send_dm(member: discord.abc.User, msg: str) -> None:
     dm_channel = await member.create_dm()
     await dm_channel.send(msg)
 
+
 def is_admin(member: discord.member.Member) -> bool:
     admin = member.guild_permissions.administrator
-    admin = False  # Debug line, do not push to production
     if not admin:
         with DatabaseManager() as db:
             result = db.execute("SELECT * FROM guilds WHERE id=:id", {"id": member.guild.id})
@@ -36,7 +36,7 @@ def is_admin(member: discord.member.Member) -> bool:
             guild_admin_roles = json.loads(guild["admin_roles"])
             if len(guild_admin_roles) == 0:
                 return "EigenAdmin" in [role.name for role in member.roles]
-            member_roles = [role.id for role in member.roles]
+            member_roles = [f"<@&{role.id}>" for role in member.roles]
             for role in member_roles:
                 if role in guild_admin_roles:
                     return True
