@@ -181,7 +181,7 @@ class DiscordHandler:
                     if emojis.decode(args[0]) == ":mag:":
                         await message.channel.send(f"Error: {args[0]} is a reserved react.")
                         return
-                    r = requests.get("http://www.eigentrust.net:31415/categories")
+                    r = requests.get("https://www.eigentrust.net:31415/categories")
                     categories = json.loads(r.text)
                     if args[1].lower() not in categories:
                         await message.channel.send(f"Error: The flavor `{args[1]}` does not exist.")

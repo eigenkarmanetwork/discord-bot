@@ -80,7 +80,7 @@ async def process_possible_trust_react(
                         + "for you on the EigenTrust Network.  However, they were unsuccessful as "
                         + "you have not linked your Discord to the ETN.  To learn what the ETN is "
                         + "about please say to me `!etn about`.  If you would like to join and do "
-                        + "not have an ETN account, please go to http://www.eigentrust.net/ and "
+                        + "not have an ETN account, please go to https://www.eigentrust.net/ and "
                         + "register.  If you do have an account, and would like to link your "
                         + "Discord, please go to http://discord.eigentrust.net/",
                     )
@@ -95,7 +95,7 @@ async def process_possible_trust_react(
             "Content-Type": "application/json",
         }
         r = requests.post(
-            "http://www.eigentrust.net:31415/get_current_key", data=json.dumps(data), headers=headers
+            "https://www.eigentrust.net:31415/get_current_key", data=json.dumps(data), headers=headers
         )
         if r.status_code not in [200, 404]:  # If not an exceptable error code:
             print(f"{r.status_code}: {r.text}")
@@ -138,7 +138,7 @@ async def process_possible_trust_react(
         headers = {
             "Content-Type": "application/json",
         }
-        r = requests.post("http://www.eigentrust.net:31415/vote", data=json.dumps(data), headers=headers)
+        r = requests.post("https://www.eigentrust.net:31415/vote", data=json.dumps(data), headers=headers)
         if r.status_code != 200:
             await send_dm(payload.member, f"Error casting vote: `{r.text}` Error Code: `{r.status_code}`.")
             return
@@ -187,7 +187,7 @@ async def process_magnifying_glass(
             "Content-Type": "application/json",
         }
         r = requests.post(
-            "http://www.eigentrust.net:31415/get_current_key", data=json.dumps(data), headers=headers
+            "https://www.eigentrust.net:31415/get_current_key", data=json.dumps(data), headers=headers
         )
         if r.status_code not in [200, 404]:  # If not an exceptable error code:
             print(f"{r.status_code}: {r.text}")
@@ -200,7 +200,7 @@ async def process_magnifying_glass(
                 payload.member,
                 "Due to your security settings, you'll need to login to see your trust score for"
                 + f"{message.author.name}#{message.author.discriminator}.  Please go to "
-                + "http://eigentrust.net/ to log in, then try again.",
+                + "https://www.eigentrust.net/ to log in, then try again.",
             )
             return
         assert r.status_code == 200
@@ -226,7 +226,7 @@ async def process_magnifying_glass(
             "Content-Type": "application/json",
         }
         r = requests.post(
-            "http://www.eigentrust.net:31415/get_vote_count", data=json.dumps(data), headers=headers
+            "https://www.eigentrust.net:31415/get_vote_count", data=json.dumps(data), headers=headers
         )
         if r.status_code != 200:
             await send_dm(
@@ -234,7 +234,7 @@ async def process_magnifying_glass(
             )
             return
         vote_count = str(json.loads(r.text)["votes"])
-        r = requests.post("http://www.eigentrust.net:31415/get_score", data=json.dumps(data), headers=headers)
+        r = requests.post("https://www.eigentrust.net:31415/get_score", data=json.dumps(data), headers=headers)
         if r.status_code != 200:
             await send_dm(
                 payload.member, f"Error getting trust score: `{r.text}` Error Code: `{r.status_code}`."
