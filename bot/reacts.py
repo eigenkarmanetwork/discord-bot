@@ -200,7 +200,8 @@ async def process_magnifying_glass(
                 payload.member,
                 "Due to your security settings, you'll need to enter your password to see your "
                 + f"trust score for {message.author.name}#{message.author.discriminator}.  Please go to "
-                + "http://discord.eigentrust.net/lookup.html to see your trust score for them.",
+                + f"http://discord.eigentrust.net/lookup.html?for={votee_id}&from={voter_id} to see your "
+                + "trust score for them.",
             )
             return
         assert r.status_code == 200
