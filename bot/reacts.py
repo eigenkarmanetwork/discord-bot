@@ -113,7 +113,7 @@ async def process_possible_trust_react(
                 "Due to your security settings, you'll need to enter your password to vote for "
                 + f"{message.author.name}#{message.author.discriminator}.  Please go to "
                 + f"http://discord.eigentrust.net/vote?voter={voter_id}&votee={votee_id}"
-                + f"&message={payload.message_id} to vote",
+                + f"&message={payload.message_id} to vote.",
             )
             return
         assert r.status_code == 200
@@ -198,9 +198,9 @@ async def process_magnifying_glass(
                 r.raise_for_status()
             await send_dm(
                 payload.member,
-                "Due to your security settings, you'll need to login to see your trust score for"
-                + f"{message.author.name}#{message.author.discriminator}.  Please go to "
-                + "https://www.eigentrust.net/ to log in, then try again.",
+                "Due to your security settings, you'll need to enter your password to see your "
+                + f"trust score for {message.author.name}#{message.author.discriminator}.  Please go to "
+                + "http://discord.eigentrust.net/lookup.html to see your trust score for them.",
             )
             return
         assert r.status_code == 200

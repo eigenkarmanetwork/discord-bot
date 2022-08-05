@@ -126,3 +126,35 @@ def cast_vote() -> Response:
             {"voter_id": voter_id, "votee_id": votee_id, "message_id": message_id},
         )
     return Response(r.text, r.status_code)
+
+
+def lookup() -> Response:
+    password, _for, _from = get_params(["password", "for", "from"])
+    data = {
+        "service_name": os.getenv("ETN_SERVICE_NAME"),
+        "service_key": os.getenv("ETN_SERVICE_KEY"),
+        "for": _for,
+        "from": _from,
+        "password": password,
+        "password_type": "raw_password",
+    }
+    headers = {
+        "Content-Type": "application/json",
+    }
+    r = requests.post("https://www.eigentrust.net:31415/get_vote_count", data=json.dumps(data), headers=headers)
+    if r.status_code != 200:
+        return Response(r.text, r.status_code)
+    response_data = json.loads(r.text)
+    assert response_data is not None
+
+    response = {"votes": response_data["votes"]}
+
+    r = requests.post("https://www.eigentrust.net:31415/get_score", data=json.dumps(data), headers=headers)
+    if r.status_code != 200:
+        return Response(r.text, r.status_code)
+    response_data = json.loads(r.text)
+    assert response_data is not None
+
+    response["score"] = response_data["score"]
+
+    return Response(json.dumps(response), 200)

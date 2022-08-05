@@ -15,6 +15,10 @@ def login() -> Response:
     return render_template("login.html")
 
 
+def lookup() -> Response:
+    return render_template("lookup.html")
+
+
 def connected() -> Response:
     return render_template("connected.html")
 
