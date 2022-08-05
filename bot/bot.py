@@ -1,5 +1,6 @@
 from database import DatabaseManager
 from helpers import is_admin, join_message, send_dm
+from reacts import process_add_reaction
 import asyncio
 import discord
 import dotenv
@@ -88,7 +89,6 @@ class DiscordHandler:
                         await message.channel.send(f"Error: Expected 1 argument, got {len(args)}")
                         return
                     is_valid_role = re.search("<@&[0-9]+>", args[0])
-                    args[0] = is_valid_role[0]
                     if not is_valid_role:
                         print(f"Error got invalid role: {args[0]}")
                         await message.channel.send(f"Error: First argument must be a @role")
@@ -122,11 +122,11 @@ class DiscordHandler:
                         await message.channel.send(f"Error: Expected 1 argument, got {len(args)}")
                         return
                     is_valid_role = re.search("<@&[0-9]+>", args[0])
-                    args[0] = is_valid_role[0]
                     if not is_valid_role:
                         print(f"Error got invalid role: {args[0]}")
                         await message.channel.send(f"Error: First argument must be a @role")
                         return
+                    args[0] = is_valid_role[0]
                     with DatabaseManager() as db:
                         result = db.execute("SELECT * FROM guilds WHERE id=:id", {"id": message.guild.id})
                         row = result.fetchone()
@@ -177,6 +177,9 @@ class DiscordHandler:
                     custom_emojis = [str(e) for e in message.guild.emojis]
                     if args[0] not in custom_emojis and emojis.count(args[0]) == 0:
                         await message.channel.send(f"Error: {args[0]} is not an emoji.")
+                        return
+                    if emojis.decode(args[0]) == ":mag:":
+                        await message.channel.send(f"Error: {args[0]} is a reserved react.")
                         return
                     r = requests.get("http://www.eigentrust.net:31415/categories")
                     categories = json.loads(r.text)
@@ -284,125 +287,7 @@ class DiscordHandler:
             if not payload.guild_id:
                 print("Reaction not in a server.")
                 return
-            with DatabaseManager() as db:
-                voter_id = payload.user_id
-                message = await payload.member.guild.get_channel(payload.channel_id).fetch_message(
-                    payload.message_id
-                )
-                votee_id = message.author.id
-                if voter_id == votee_id:
-                    print("User cannot vote for themselves.")
-                    return None
-                result = db.execute("SELECT * FROM guilds WHERE id=:id", {"id": payload.guild_id})
-                row = result.fetchone()
-                if not row:
-                    print("Server is not connected?")
-                    return
-                reacts = json.loads(row["reactions"])
-                if str(payload.emoji) not in reacts:
-                    print("Not a trust reaction")
-                    return
-                result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": voter_id})
-                row = result.fetchone()
-                if not row:
-                    await send_dm(
-                        payload.member,
-                        "Your Discord is not connected to the ETN.  "
-                        + "Please connect your account at http://discord.eigentrust.net/ to vote.",
-                    )
-                    return
-                result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": votee_id})
-                row = result.fetchone()
-                if not row:
-                    result = db.execute("SELECT * FROM missed_votes WHERE id=:id", {"id": votee_id})
-                    row = result.fetchone()
-                    if not row:
-                        db.execute("INSERT INTO missed_votes (id, count) VALUES (?, 1)", (votee_id,))
-                        votee_user = await self.client.fetch_user(votee_id)
-                        votee_name = f"{votee_user.name}#{votee_user.discriminator}"
-                        await send_dm(
-                            payload.member,
-                            f"Unable to vote for {votee_name}.  "
-                            + "They have not connected their Discord to the ETN.",
-                        )
-                    else:
-                        db.execute(
-                            "UPDATE missed_votes SET count=:count WHERE id=:id",
-                            {"id": votee_id, "count": row["count"] + 1},
-                        )
-                        if row["count"] + 1 == 5:
-                            await send_dm(
-                                message.author,
-                                f"Hello {message.author.name}, other Discord users have attempted to vote "
-                                + "for you on the EigenTrust Network.  However, they were unsuccessful as "
-                                + "you have not linked your Discord to the ETN.  To learn what the ETN is "
-                                + "about please say to me `!etn about`.  If you would like to join and do "
-                                + "not have an ETN account, please go to http://www.eigentrust.net/ and "
-                                + "register.  If you do have an account, and would like to link your "
-                                + "Discord, please go to http://discord.eigentrust.net/",
-                            )
-                    return
-
-                data = {
-                    "username": str(voter_id),
-                    "service_name": os.getenv("ETN_SERVICE_NAME"),
-                    "service_key": os.getenv("ETN_SERVICE_KEY"),
-                }
-                headers = {
-                    "Content-Type": "application/json",
-                }
-                r = requests.post(
-                    "http://www.eigentrust.net:31415/get_current_key", data=json.dumps(data), headers=headers
-                )
-                if r.status_code not in [200, 404]:  # If not an exceptable error code:
-                    print(f"{r.status_code}: {r.text}")
-                    r.raise_for_status()
-                if r.status_code == 404:
-                    if r.text != "No key available.":
-                        print(f"{r.status_code}: {r.text}")
-                        r.raise_for_status()
-                    db.execute(
-                        "INSERT INTO pending_votes (voter_id, message_id, channel_id, guild_id, votee_id) VALUES (?, ?, ?, ?, ?)",
-                        (voter_id, payload.message_id, payload.channel_id, payload.guild_id, votee_id),
-                    )
-                    await send_dm(
-                        payload.member,
-                        "Due to your security settings, you'll need to enter your password to vote for "
-                        + f"{message.author.name}#{message.author.discriminator}.  Please go to "
-                        + f"http://discord.eigentrust.net/vote?voter={voter_id}&votee={votee_id}"
-                        + f"&message={payload.message_id} to vote",
-                    )
-                    return
-                assert r.status_code == 200
-                data = json.loads(r.text)
-                password = data["password"]
-                password_type = data["password_type"]
-                expires = data["expires"]
-                if expires - 10 < time.time() and password_type == "session_key":
-                    # If session key is about to expire, wait for it to expire and recall this funciton.
-                    # This will make the user be caught by the "Please enter your password" message instead
-                    # of trying to get this vote in before time runs out.
-                    await asyncio.sleep(10)
-                    return await on_raw_reaction_add(payload)
-                data = {
-                    "service_name": os.getenv("ETN_SERVICE_NAME"),
-                    "service_key": os.getenv("ETN_SERVICE_KEY"),
-                    "to": str(votee_id),
-                    "from": str(voter_id),
-                    "password": password,
-                    "password_type": password_type,
-                }
-                headers = {
-                    "Content-Type": "application/json",
-                }
-                r = requests.post(
-                    "http://www.eigentrust.net:31415/vote", data=json.dumps(data), headers=headers
-                )
-                if r.status_code != 200:
-                    await send_dm(
-                        payload.member, f"Error casting vote: `{r.text}` Error Code: `{r.status_code}`."
-                    )
-                    return
+            await process_add_reaction(self, payload)
 
         @self.client.event
         async def on_raw_reaction_remove(payload: discord.raw_models.RawReactionActionEvent) -> None:
