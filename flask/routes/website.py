@@ -15,7 +15,7 @@ def login() -> Response:
     return render_template("login.html")
 
 
-def lookup() -> Response:
+def lookup_page() -> Response:
     return render_template("lookup.html")
 
 
