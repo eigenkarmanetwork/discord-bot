@@ -22,7 +22,7 @@
                     if(this.readyState == 4 && this.status == 200){
                         var data = JSON.parse(this.responseText);
                         document.getElementById("output").innerHTML = "You have voted for this user ";
-                        document.getElementById("output").innerHTML += data["votes"] + ((data["votes"] == 1) ? "time." : "times.");
+                        document.getElementById("output").innerHTML += data["votes"] + ((data["votes"] == 1) ? " time." : " times.");
                         document.getElementById("output").innerHTML += "<br>Their score within your trust network is ";
                         document.getElementById("output").innerHTML += data["score"] + ".";
                     }else if(this.readyState == 4 && this.status == 403){
@@ -68,7 +68,7 @@
                 <td><input id="password" type="password"></td>
             </tr>
         </table>
-        <button id="vote" onclick="javascript:vote()">Cast Vote</button>
+        <button id="vote" onclick="javascript:vote()">Lookup</button><br>
         <span id="output"></span>
           
         {% endblock %}
