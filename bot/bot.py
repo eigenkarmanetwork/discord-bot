@@ -293,10 +293,11 @@ class DiscordHandler:
         async def on_raw_reaction_remove(payload: discord.raw_models.RawReactionActionEvent) -> None:
             print("Discord bot noticed a reaction was removed!")
             print(f"Payload: {payload}")
-            guild = self.client.get_guild(payload.guild_id)
-            voter_id = payload.user_id
-            message = await guild.get_channel(payload.channel_id).fetch_message(payload.message_id)
-            votee_id = message.author.id
+            print(f"Emoji: {payload.emoji}")
+            if not payload.guild_id:
+                print("Reaction not in a server.")
+                return
+            await process_remove_reaction(self, payload)
 
 
 if __name__ == "__main__":

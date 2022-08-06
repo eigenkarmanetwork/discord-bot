@@ -16,7 +16,11 @@
                 var voter_id = getUrlParameters()["voter"];
                 var votee_id = getUrlParameters()["votee"];
                 var message = getUrlParameters()["message"];
-                var data = {"password": password, "voter_id": voter_id, "votee_id": votee_id, "message_id": message};
+                var amount = getUrlParameters()["amount"];
+                if(!amount){
+                    amount = 1
+                }
+                var data = {"password": password, "voter_id": voter_id, "votee_id": votee_id, "message_id": message, "amount": amount};
 
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function(){
