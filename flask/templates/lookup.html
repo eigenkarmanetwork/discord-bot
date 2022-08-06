@@ -22,7 +22,7 @@
                     if(this.readyState == 4 && this.status == 200){
                         var data = JSON.decode(this.responseText);
                         document.getElementById("notice").innerHTML = "You have voted for this user ";
-                        document.getElementById("notice").innerHTML += data["votes"] + ((data["votes"] == 1 ? "time." : "times.");
+                        document.getElementById("notice").innerHTML += data["votes"] + ((data["votes"] == 1) ? "time." : "times.");
                         document.getElementById("notice").innerHTML = "<br>Their score within your trust network is ";
                         document.getElementById("notice").innerHTML += data["score"] + ".";
                         document.location.href = "/voted.html";
