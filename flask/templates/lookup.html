@@ -21,11 +21,10 @@
                 xhttp.onreadystatechange = function(){
                     if(this.readyState == 4 && this.status == 200){
                         var data = JSON.parse(this.responseText);
-                        document.getElementById("notice").innerHTML = "You have voted for this user ";
-                        document.getElementById("notice").innerHTML += data["votes"] + ((data["votes"] == 1) ? "time." : "times.");
-                        document.getElementById("notice").innerHTML = "<br>Their score within your trust network is ";
-                        document.getElementById("notice").innerHTML += data["score"] + ".";
-                        document.location.href = "/voted.html";
+                        document.getElementById("output").innerHTML = "You have voted for this user ";
+                        document.getElementById("output").innerHTML += data["votes"] + ((data["votes"] == 1) ? "time." : "times.");
+                        document.getElementById("output").innerHTML += "<br>Their score within your trust network is ";
+                        document.getElementById("output").innerHTML += data["score"] + ".";
                     }else if(this.readyState == 4 && this.status == 403){
                         document.getElementById("notice").innerHTML = this.responseText;
                         document.getElementById("notice").style = "color: red;";
@@ -70,6 +69,7 @@
             </tr>
         </table>
         <button id="vote" onclick="javascript:vote()">Cast Vote</button>
+        <span id="output"></span>
           
         {% endblock %}
     </body>
