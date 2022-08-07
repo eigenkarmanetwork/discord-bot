@@ -255,8 +255,10 @@ async def process_remove_reaction(
     self: "DiscordHandler", payload: discord.raw_models.RawReactionActionEvent
 ) -> None:
     with DatabaseManager() as db:
+        guild = self.client.get_guild(payload.guild_id)
         voter_id = payload.user_id
-        message = await payload.member.guild.get_channel(payload.channel_id).fetch_message(payload.message_id)
+        member = self.client.get_user(voter_id)
+        message = await guild.get_channel(payload.channel_id).fetch_message(payload.message_id)
         votee_id = message.author.id
         if voter_id == votee_id:
             print("User cannot vote for themselves.")
@@ -274,7 +276,7 @@ async def process_remove_reaction(
         row = result.fetchone()
         if not row:
             await send_dm(
-                payload.member,
+                member,
                 "Your Discord is not connected to the ETN.  "
                 + "Please connect your account at http://discord.eigentrust.net/ to vote.",
             )
@@ -289,7 +291,7 @@ async def process_remove_reaction(
                 votee_user = await self.client.fetch_user(votee_id)
                 votee_name = f"{votee_user.name}#{votee_user.discriminator}"
                 await send_dm(
-                    payload.member,
+                    member,
                     f"Unable to vote for {votee_name}.  "
                     + "They have not connected their Discord to the ETN.",
                 )
@@ -334,7 +336,7 @@ async def process_remove_reaction(
                 (voter_id, payload.message_id, payload.channel_id, payload.guild_id, votee_id),
             )
             await send_dm(
-                payload.member,
+                member,
                 "Due to your security settings, you'll need to enter your password to vote for "
                 + f"{message.author.name}#{message.author.discriminator}.  Please go to "
                 + f"http://discord.eigentrust.net/vote?voter={voter_id}&votee={votee_id}"
@@ -366,5 +368,5 @@ async def process_remove_reaction(
         }
         r = requests.post("https://www.eigentrust.net:31415/vote", data=json.dumps(data), headers=headers)
         if r.status_code != 200:
-            await send_dm(payload.member, f"Error casting vote: `{r.text}` Error Code: `{r.status_code}`.")
+            await send_dm(member, f"Error casting vote: `{r.text}` Error Code: `{r.status_code}`.")
             return
