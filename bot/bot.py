@@ -1,6 +1,6 @@
 from database import DatabaseManager
 from helpers import is_admin, join_message, send_dm
-from reacts import process_add_reaction
+from reacts import process_add_reaction, process_remove_reaction
 import asyncio
 import discord
 import dotenv

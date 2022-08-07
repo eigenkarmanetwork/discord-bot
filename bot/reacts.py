@@ -251,7 +251,7 @@ async def process_magnifying_glass(
         await send_dm(payload.member, response)
 
 
-async def process_remove_react(
+async def process_remove_reaction(
     self: "DiscordHandler", payload: discord.raw_models.RawReactionActionEvent
 ) -> None:
     with DatabaseManager() as db:
