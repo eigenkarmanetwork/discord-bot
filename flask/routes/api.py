@@ -97,7 +97,7 @@ def connect() -> Response:
 
 
 def cast_vote() -> Response:
-    password, voter_id, votee_id, message_id = get_params(["password", "voter_id", "votee_id", "message_id"])
+    password, voter_id, votee_id, message_id, amount = get_params(["password", "voter_id", "votee_id", "message_id", "amount"])
     with DatabaseManager() as db:
         result = db.execute(
             "SELECT * FROM pending_votes WHERE voter_id=:voter_id AND votee_id=:votee_id AND message_id=:message_id",
@@ -113,6 +113,7 @@ def cast_vote() -> Response:
         "from": voter_id,
         "password": password,
         "password_type": "raw_password",
+        "amount": amount,
     }
     headers = {
         "Content-Type": "application/json",
