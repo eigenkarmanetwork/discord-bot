@@ -88,16 +88,17 @@ def connect() -> Response:
         if result.fetchone():
             db.execute("DELETE FROM connections WHERE id=:id", {"id": id})
             db.commit()
-        else:
-            db.execute(
-                "INSERT INTO connections (id, key, key_type, expires) VALUES (?, ?, ?, ?)",
-                (id, key, key_type, expires),
-            )
+        db.execute(
+            "INSERT INTO connections (id, key, key_type, expires) VALUES (?, ?, ?, ?)",
+            (id, key, key_type, expires),
+        )
     return Response("Success.", 200)
 
 
 def cast_vote() -> Response:
-    password, voter_id, votee_id, message_id, amount = get_params(["password", "voter_id", "votee_id", "message_id", "amount"])
+    password, voter_id, votee_id, message_id, amount = get_params(
+        ["password", "voter_id", "votee_id", "message_id", "amount"]
+    )
     with DatabaseManager() as db:
         result = db.execute(
             "SELECT * FROM pending_votes WHERE voter_id=:voter_id AND votee_id=:votee_id AND message_id=:message_id",
@@ -142,7 +143,9 @@ def lookup() -> Response:
     headers = {
         "Content-Type": "application/json",
     }
-    r = requests.post("https://www.eigentrust.net:31415/get_vote_count", data=json.dumps(data), headers=headers)
+    r = requests.post(
+        "https://www.eigentrust.net:31415/get_vote_count", data=json.dumps(data), headers=headers
+    )
     if r.status_code != 200:
         return Response(r.text, r.status_code)
     response_data = json.loads(r.text)

@@ -1,6 +1,10 @@
 from database import DatabaseManager
+from typing import Optional
 import discord
 import json
+import os
+import requests
+import sqlite3
 
 
 async def join_message(guild: discord.guild.Guild) -> None:
@@ -41,3 +45,33 @@ def is_admin(member: discord.member.Member) -> bool:
                 if role in guild_admin_roles:
                     return True
     return admin
+
+
+def create_temp_user(username: str | int) -> Optional[sqlite3.Row]:
+    data = {
+        "service_name": os.getenv("ETN_SERVICE_NAME"),
+        "service_key": os.getenv("ETN_SERVICE_KEY"),
+        "service_user": username,
+    }
+    headers = {
+        "Content-Type": "application/json",
+    }
+    r = requests.post(
+        "https://eigentrust.net:31415/register_temp_user", data=json.dumps(data), headers=headers
+    )
+    r.raise_for_status()
+    data["username"] = data["service_user"]
+    del data["service_user"]
+    r = requests.post("https://eigentrust.net:31415/get_current_key", data=json.dumps(data), headers=headers)
+    r.raise_for_status()
+    response = json.loads(r.text)
+    key = response["password"]
+    key_type = response["password_type"]
+    expires = response["expires"]
+    with DatabaseManager() as db:
+        db.execute(
+            "INSERT INTO connections (id, key, key_type, expires) VALUES (?, ?, ?, ?)",
+            (int(username), key, key_type, expires),
+        )
+        result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": int(username)})
+        return result.fetchone()
