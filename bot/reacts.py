@@ -1,5 +1,5 @@
 from database import DatabaseManager
-from helpers import send_dm
+from helpers import create_temp_user, send_dm
 from typing import TYPE_CHECKING
 import asyncio
 import discord
@@ -48,43 +48,11 @@ async def process_possible_trust_react(
         result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": voter_id})
         row = result.fetchone()
         if not row:
-            await send_dm(
-                payload.member,
-                "Your Discord is not connected to the ETN.  "
-                + "Please connect your account at http://discord.eigentrust.net/ to vote.",
-            )
-            return
+            row = create_temp_user(voter_id)
         result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": votee_id})
         row = result.fetchone()
         if not row:
-            result = db.execute("SELECT * FROM missed_votes WHERE id=:id", {"id": votee_id})
-            row = result.fetchone()
-            if not row:
-                db.execute("INSERT INTO missed_votes (id, count) VALUES (?, 1)", (votee_id,))
-                votee_user = await self.client.fetch_user(votee_id)
-                votee_name = f"{votee_user.name}#{votee_user.discriminator}"
-                await send_dm(
-                    payload.member,
-                    f"Unable to vote for {votee_name}.  "
-                    + "They have not connected their Discord to the ETN.",
-                )
-            else:
-                db.execute(
-                    "UPDATE missed_votes SET count=:count WHERE id=:id",
-                    {"id": votee_id, "count": row["count"] + 1},
-                )
-                if row["count"] + 1 == 5:
-                    await send_dm(
-                        message.author,
-                        f"Hello {message.author.name}, other Discord users have attempted to vote "
-                        + "for you on the EigenTrust Network.  However, they were unsuccessful as "
-                        + "you have not linked your Discord to the ETN.  To learn what the ETN is "
-                        + "about please say to me `!etn about`.  If you would like to join and do "
-                        + "not have an ETN account, please go to https://www.eigentrust.net/ and "
-                        + "register.  If you do have an account, and would like to link your "
-                        + "Discord, please go to http://discord.eigentrust.net/",
-                    )
-            return
+            row = create_temp_user(votee_id)
 
         data = {
             "username": str(voter_id),
@@ -162,21 +130,11 @@ async def process_magnifying_glass(
         result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": voter_id})
         row = result.fetchone()
         if not row:
-            await send_dm(
-                payload.member,
-                "Your Discord is not connected to the ETN.  "
-                + "Please connect your account at http://discord.eigentrust.net/ to vote.",
-            )
-            return
+            row = create_temp_user(voter_id)
         result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": votee_id})
         row = result.fetchone()
         if not row:
-            await send_dm(
-                payload.member,
-                f"{message.author.name}#{message.author.discriminator} is not connected to the ETN."
-                + "  Unable to get score.",
-            )
-            return
+            row = create_temp_user(votee_id)
 
         data = {
             "username": str(voter_id),
@@ -235,7 +193,9 @@ async def process_magnifying_glass(
             )
             return
         vote_count = str(json.loads(r.text)["votes"])
-        r = requests.post("https://www.eigentrust.net:31415/get_score", data=json.dumps(data), headers=headers)
+        r = requests.post(
+            "https://www.eigentrust.net:31415/get_score", data=json.dumps(data), headers=headers
+        )
         if r.status_code != 200:
             await send_dm(
                 payload.member, f"Error getting trust score: `{r.text}` Error Code: `{r.status_code}`."
@@ -275,45 +235,13 @@ async def process_remove_reaction(
         result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": voter_id})
         row = result.fetchone()
         if not row:
-            await send_dm(
-                member,
-                "Your Discord is not connected to the ETN.  "
-                + "Please connect your account at http://discord.eigentrust.net/ to vote.",
-            )
-            return
+            row = create_temp_user(voter_id)
         result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": votee_id})
         row = result.fetchone()
         if not row:
-            result = db.execute("SELECT * FROM missed_votes WHERE id=:id", {"id": votee_id})
-            row = result.fetchone()
-            if not row:
-                db.execute("INSERT INTO missed_votes (id, count) VALUES (?, 1)", (votee_id,))
-                votee_user = await self.client.fetch_user(votee_id)
-                votee_name = f"{votee_user.name}#{votee_user.discriminator}"
-                await send_dm(
-                    member,
-                    f"Unable to vote for {votee_name}.  "
-                    + "They have not connected their Discord to the ETN.",
-                )
-            else:
-                db.execute(
-                    "UPDATE missed_votes SET count=:count WHERE id=:id",
-                    {"id": votee_id, "count": row["count"] + 1},
-                )
-                if row["count"] + 1 == 5:
-                    await send_dm(
-                        message.author,
-                        f"Hello {message.author.name}, other Discord users have attempted to vote "
-                        + "for you on the EigenTrust Network.  However, they were unsuccessful as "
-                        + "you have not linked your Discord to the ETN.  To learn what the ETN is "
-                        + "about please say to me `!etn about`.  If you would like to join and do "
-                        + "not have an ETN account, please go to https://www.eigentrust.net/ and "
-                        + "register.  If you do have an account, and would like to link your "
-                        + "Discord, please go to http://discord.eigentrust.net/",
-                    )
-            return
+            row = create_temp_user(votee_id)
 
-        data = {
+        data: dict[str, str | int | None] = {
             "username": str(voter_id),
             "service_name": os.getenv("ETN_SERVICE_NAME"),
             "service_key": os.getenv("ETN_SERVICE_KEY"),
