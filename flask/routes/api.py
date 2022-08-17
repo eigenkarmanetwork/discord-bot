@@ -96,13 +96,13 @@ def connect() -> Response:
 
 
 def cast_vote() -> Response:
-    password, voter_id, votee_id, message_id, amount = get_params(
-        ["password", "voter_id", "votee_id", "message_id", "amount"]
+    password, voter_id, votee_id, message_id, flavor, amount = get_params(
+        ["password", "voter_id", "votee_id", "message_id", "flavor", "amount"]
     )
     with DatabaseManager() as db:
         result = db.execute(
-            "SELECT * FROM pending_votes WHERE voter_id=:voter_id AND votee_id=:votee_id AND message_id=:message_id",
-            {"voter_id": voter_id, "votee_id": votee_id, "message_id": message_id},
+            "SELECT * FROM pending_votes WHERE voter_id=:voter_id AND votee_id=:votee_id AND message_id=:message_id AND flavor=:flavor",
+            {"voter_id": voter_id, "votee_id": votee_id, "message_id": message_id, "flavor": flavor},
         )
         vote_row = result.fetchone()
         if not vote_row:
@@ -114,6 +114,7 @@ def cast_vote() -> Response:
         "from": voter_id,
         "password": password,
         "password_type": "raw_password",
+        "flavor": flavor,
         "amount": amount,
     }
     headers = {

@@ -45,6 +45,7 @@ async def process_possible_trust_react(
         if str(payload.emoji) not in reacts:
             print("Not a trust reaction")
             return
+        flavor = reacts[str(payload.emoji)]
         result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": voter_id})
         row = result.fetchone()
         if not row:
@@ -73,15 +74,15 @@ async def process_possible_trust_react(
                 print(f"{r.status_code}: {r.text}")
                 r.raise_for_status()
             db.execute(
-                "INSERT INTO pending_votes (voter_id, message_id, channel_id, guild_id, votee_id) VALUES (?, ?, ?, ?, ?)",
-                (voter_id, payload.message_id, payload.channel_id, payload.guild_id, votee_id),
+                "INSERT INTO pending_votes (voter_id, message_id, channel_id, guild_id, votee_id, flavor) VALUES (?, ?, ?, ?, ?, ?)",
+                (voter_id, payload.message_id, payload.channel_id, payload.guild_id, votee_id, flavor),
             )
             await send_dm(
                 payload.member,
                 "Due to your security settings, you'll need to enter your password to vote for "
                 + f"{message.author.name}#{message.author.discriminator}.  Please go to "
                 + f"http://discord.eigentrust.net/vote?voter={voter_id}&votee={votee_id}"
-                + f"&message={payload.message_id} to vote.",
+                + f"&message={payload.message_id}&flavor={flavor} to vote.",
             )
             return
         assert r.status_code == 200
@@ -102,6 +103,7 @@ async def process_possible_trust_react(
             "from": str(voter_id),
             "password": password,
             "password_type": password_type,
+            "flavor": flavor,
         }
         headers = {
             "Content-Type": "application/json",
@@ -232,6 +234,7 @@ async def process_remove_reaction(
         if str(payload.emoji) not in reacts:
             print("Not a trust reaction")
             return
+        flavor = reacts[str(payload.emoji)]
         result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": voter_id})
         row = result.fetchone()
         if not row:
@@ -268,7 +271,7 @@ async def process_remove_reaction(
                 "Due to your security settings, you'll need to enter your password to vote for "
                 + f"{message.author.name}#{message.author.discriminator}.  Please go to "
                 + f"http://discord.eigentrust.net/vote?voter={voter_id}&votee={votee_id}"
-                + f"&message={payload.message_id}&amount=-1 to vote.",
+                + f"&message={payload.message_id}&amount=-1&flavor={flavor} to vote.",
             )
             return
         assert r.status_code == 200
@@ -289,6 +292,7 @@ async def process_remove_reaction(
             "from": str(voter_id),
             "password": password,
             "password_type": password_type,
+            "flavor": flavor,
             "amount": -1,
         }
         headers = {
