@@ -210,7 +210,7 @@ async def process_magnifying_glass(
         response = (
             f"You have voted for {message.author.name}#{message.author.discriminator} (ID "
             + f"{votee_id}) {vote_count} "
-            + ("times" if vote_count != 1 else "time") + ".\n"
+            + ("times" if vote_count != "1" else "time") + ".\n"
             + f"Their general score within your trust network is {trust_score}."
         )
         for flavor in categories:
@@ -238,7 +238,7 @@ async def process_magnifying_glass(
             response += (
                 f"\n\nYou have voted for {message.author.name}#{message.author.discriminator} (ID "
                 + f"{votee_id}) {vote_count} "
-                + ("times" if vote_count != 1 else "time") + f" in the {flavor} flavor.\n"
+                + ("times" if vote_count != "1" else "time") + f" in the {flavor} flavor.\n"
                 + f"Their {flavor} score within your trust network is {trust_score}."
             )
         await send_dm(payload.member, response)
