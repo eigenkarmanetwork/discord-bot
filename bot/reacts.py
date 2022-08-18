@@ -1,6 +1,7 @@
 from database import DatabaseManager
 from helpers import create_temp_user, send_dm
 from typing import TYPE_CHECKING
+import urllib.parse
 import asyncio
 import discord
 import emojis
@@ -45,6 +46,7 @@ async def process_possible_trust_react(
         if str(payload.emoji) not in reacts:
             print("Not a trust reaction")
             return
+        flavor = reacts[str(payload.emoji)]
         result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": voter_id})
         row = result.fetchone()
         if not row:
@@ -73,15 +75,15 @@ async def process_possible_trust_react(
                 print(f"{r.status_code}: {r.text}")
                 r.raise_for_status()
             db.execute(
-                "INSERT INTO pending_votes (voter_id, message_id, channel_id, guild_id, votee_id) VALUES (?, ?, ?, ?, ?)",
-                (voter_id, payload.message_id, payload.channel_id, payload.guild_id, votee_id),
+                "INSERT INTO pending_votes (voter_id, message_id, channel_id, guild_id, votee_id, flavor) VALUES (?, ?, ?, ?, ?, ?)",
+                (voter_id, payload.message_id, payload.channel_id, payload.guild_id, votee_id, flavor),
             )
             await send_dm(
                 payload.member,
                 "Due to your security settings, you'll need to enter your password to vote for "
                 + f"{message.author.name}#{message.author.discriminator}.  Please go to "
                 + f"http://discord.eigentrust.net/vote?voter={voter_id}&votee={votee_id}"
-                + f"&message={payload.message_id} to vote.",
+                + f"&message={payload.message_id}&flavor={urllib.parse.quote(flavor)} to vote.",
             )
             return
         assert r.status_code == 200
@@ -102,6 +104,7 @@ async def process_possible_trust_react(
             "from": str(voter_id),
             "password": password,
             "password_type": password_type,
+            "flavor": flavor,
         }
         headers = {
             "Content-Type": "application/json",
@@ -127,6 +130,8 @@ async def process_magnifying_glass(
         if not row:
             print("Server is not connected?")
             return
+        reacts = json.loads(row["reactions"])
+        categories = list(reacts.values())
         result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": voter_id})
         row = result.fetchone()
         if not row:
@@ -205,9 +210,37 @@ async def process_magnifying_glass(
         response = (
             f"You have voted for {message.author.name}#{message.author.discriminator} (ID "
             + f"{votee_id}) {vote_count} "
-            + ("times.\n\n" if vote_count != 1 else "time.\n\n")
-            + f"Their score within your trust network is {trust_score}."
+            + ("times" if vote_count != 1 else "time") + ".\n"
+            + f"Their general score within your trust network is {trust_score}."
         )
+        for flavor in categories:
+            if flavor == "general":
+                continue
+            data["flavor"] = flavor
+            r = requests.post(
+                "https://www.eigentrust.net:31415/get_vote_count", data=json.dumps(data), headers=headers
+            )
+            if r.status_code != 200:
+                await send_dm(
+                    payload.member, f"Error checking vote count: `{r.text}` Error Code: `{r.status_code}`."
+                )
+                return
+            vote_count = str(json.loads(r.text)["votes"])
+            r = requests.post(
+                "https://www.eigentrust.net:31415/get_score", data=json.dumps(data), headers=headers
+            )
+            if r.status_code != 200:
+                await send_dm(
+                    payload.member, f"Error getting trust score: `{r.text}` Error Code: `{r.status_code}`."
+                )
+                return
+            trust_score = str(json.loads(r.text)["score"])
+            response += (
+                f"\n\nYou have voted for {message.author.name}#{message.author.discriminator} (ID "
+                + f"{votee_id}) {vote_count} "
+                + ("times" if vote_count != 1 else "time") + f" in the {flavor} flavor.\n"
+                + f"Their {flavor} score within your trust network is {trust_score}."
+            )
         await send_dm(payload.member, response)
 
 
@@ -232,6 +265,7 @@ async def process_remove_reaction(
         if str(payload.emoji) not in reacts:
             print("Not a trust reaction")
             return
+        flavor = reacts[str(payload.emoji)]
         result = db.execute("SELECT * FROM connections WHERE id=:id", {"id": voter_id})
         row = result.fetchone()
         if not row:
@@ -260,15 +294,15 @@ async def process_remove_reaction(
                 print(f"{r.status_code}: {r.text}")
                 r.raise_for_status()
             db.execute(
-                "INSERT INTO pending_votes (voter_id, message_id, channel_id, guild_id, votee_id) VALUES (?, ?, ?, ?, ?)",
-                (voter_id, payload.message_id, payload.channel_id, payload.guild_id, votee_id),
+                "INSERT INTO pending_votes (voter_id, message_id, channel_id, guild_id, votee_id, flavor) VALUES (?, ?, ?, ?, ?, ?)",
+                (voter_id, payload.message_id, payload.channel_id, payload.guild_id, votee_id, flavor),
             )
             await send_dm(
                 member,
                 "Due to your security settings, you'll need to enter your password to vote for "
                 + f"{message.author.name}#{message.author.discriminator}.  Please go to "
                 + f"http://discord.eigentrust.net/vote?voter={voter_id}&votee={votee_id}"
-                + f"&message={payload.message_id}&amount=-1 to vote.",
+                + f"&message={payload.message_id}&amount=-1&flavor={urllib.parse.quote(flavor)} to vote.",
             )
             return
         assert r.status_code == 200
@@ -289,6 +323,7 @@ async def process_remove_reaction(
             "from": str(voter_id),
             "password": password,
             "password_type": password_type,
+            "flavor": flavor,
             "amount": -1,
         }
         headers = {
