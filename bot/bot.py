@@ -164,6 +164,11 @@ class DiscordHandler:
                         response += "\nEigenAdmin"
                     await message.channel.send(response)
 
+                elif command.lower() == "list_flavors":
+                    r = requests.get("https://www.eigentrust.net:31415/categories")
+                    categories = json.loads(r.text)
+                    await message.channel.send("Available Flavors:\n\n" + ("\n".join(categories)))
+
                 elif command.lower() == "add_trust_react":
                     if is_dm:
                         await message.channel.send("Error: You can only use this command in a server.")

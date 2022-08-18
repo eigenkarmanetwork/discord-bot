@@ -1,6 +1,7 @@
 from database import DatabaseManager
 from flask import redirect, request, Response
 from helpers import get_params
+import urllib.parse
 import dotenv
 import json
 import os
@@ -99,6 +100,8 @@ def cast_vote() -> Response:
     password, voter_id, votee_id, message_id, flavor, amount = get_params(
         ["password", "voter_id", "votee_id", "message_id", "flavor", "amount"]
     )
+    flavor = urllib.parse.unquote(flavor)
+    print(f"{flavor=}")
     with DatabaseManager() as db:
         result = db.execute(
             "SELECT * FROM pending_votes WHERE voter_id=:voter_id AND votee_id=:votee_id AND message_id=:message_id AND flavor=:flavor",
@@ -125,8 +128,8 @@ def cast_vote() -> Response:
         return Response(r.text, r.status_code)
     with DatabaseManager() as db:
         db.execute(
-            "DELETE FROM pending_votes WHERE voter_id=:voter_id AND votee_id=:votee_id AND message_id=:message_id",
-            {"voter_id": voter_id, "votee_id": votee_id, "message_id": message_id},
+            "DELETE FROM pending_votes WHERE voter_id=:voter_id AND votee_id=:votee_id AND message_id=:message_id AND flavor=:flavor",
+            {"voter_id": voter_id, "votee_id": votee_id, "message_id": message_id, "flavor": flavor},
         )
     return Response(r.text, r.status_code)
 
