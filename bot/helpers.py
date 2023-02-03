@@ -62,12 +62,12 @@ def create_temp_user(username: str | int) -> Optional[sqlite3.Row]:
         "Content-Type": "application/json",
     }
     r = requests.post(
-        "https://eigentrust.net:31415/register_temp_user", data=json.dumps(data), headers=headers
+        "https://eigenkarma.net:31415/register_temp_user", data=json.dumps(data), headers=headers
     )
     r.raise_for_status()
     data["username"] = data["service_user"]
     del data["service_user"]
-    r = requests.post("https://eigentrust.net:31415/get_current_key", data=json.dumps(data), headers=headers)
+    r = requests.post("https://eigenkarma.net:31415/get_current_key", data=json.dumps(data), headers=headers)
     r.raise_for_status()
     response = json.loads(r.text)
     key = response["password"]

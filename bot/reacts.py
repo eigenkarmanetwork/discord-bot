@@ -65,7 +65,7 @@ async def process_possible_trust_react(
             "Content-Type": "application/json",
         }
         r = requests.post(
-            "https://www.eigentrust.net:31415/get_current_key", data=json.dumps(data), headers=headers
+            "https://www.eigenkarma.net:31415/get_current_key", data=json.dumps(data), headers=headers
         )
         if r.status_code not in [200, 404]:  # If not an exceptable error code:
             print(f"{r.status_code}: {r.text}")
@@ -109,7 +109,7 @@ async def process_possible_trust_react(
         headers = {
             "Content-Type": "application/json",
         }
-        r = requests.post("https://www.eigentrust.net:31415/vote", data=json.dumps(data), headers=headers)
+        r = requests.post("https://www.eigenkarma.net:31415/vote", data=json.dumps(data), headers=headers)
         if r.status_code != 200:
             await send_dm(payload.member, f"Error casting vote: `{r.text}` Error Code: `{r.status_code}`.")
             return
@@ -150,7 +150,7 @@ async def process_magnifying_glass(
             "Content-Type": "application/json",
         }
         r = requests.post(
-            "https://www.eigentrust.net:31415/get_current_key", data=json.dumps(data), headers=headers
+            "https://www.eigenkarma.net:31415/get_current_key", data=json.dumps(data), headers=headers
         )
         if r.status_code not in [200, 404]:  # If not an exceptable error code:
             print(f"{r.status_code}: {r.text}")
@@ -190,7 +190,7 @@ async def process_magnifying_glass(
             "Content-Type": "application/json",
         }
         r = requests.post(
-            "https://www.eigentrust.net:31415/get_vote_count", data=json.dumps(data), headers=headers
+            "https://www.eigenkarma.net:31415/get_vote_count", data=json.dumps(data), headers=headers
         )
         if r.status_code != 200:
             await send_dm(
@@ -199,7 +199,7 @@ async def process_magnifying_glass(
             return
         vote_count = str(json.loads(r.text)["votes"])
         r = requests.post(
-            "https://www.eigentrust.net:31415/get_score", data=json.dumps(data), headers=headers
+            "https://www.eigenkarma.net:31415/get_score", data=json.dumps(data), headers=headers
         )
         if r.status_code != 200:
             await send_dm(
@@ -218,7 +218,7 @@ async def process_magnifying_glass(
                 continue
             data["flavor"] = flavor
             r = requests.post(
-                "https://www.eigentrust.net:31415/get_vote_count", data=json.dumps(data), headers=headers
+                "https://www.eigenkarma.net:31415/get_vote_count", data=json.dumps(data), headers=headers
             )
             if r.status_code != 200:
                 await send_dm(
@@ -227,7 +227,7 @@ async def process_magnifying_glass(
                 return
             vote_count = str(json.loads(r.text)["votes"])
             r = requests.post(
-                "https://www.eigentrust.net:31415/get_score", data=json.dumps(data), headers=headers
+                "https://www.eigenkarma.net:31415/get_score", data=json.dumps(data), headers=headers
             )
             if r.status_code != 200:
                 await send_dm(
@@ -284,7 +284,7 @@ async def process_remove_reaction(
             "Content-Type": "application/json",
         }
         r = requests.post(
-            "https://www.eigentrust.net:31415/get_current_key", data=json.dumps(data), headers=headers
+            "https://www.eigenkarma.net:31415/get_current_key", data=json.dumps(data), headers=headers
         )
         if r.status_code not in [200, 404]:  # If not an exceptable error code:
             print(f"{r.status_code}: {r.text}")
@@ -329,7 +329,7 @@ async def process_remove_reaction(
         headers = {
             "Content-Type": "application/json",
         }
-        r = requests.post("https://www.eigentrust.net:31415/vote", data=json.dumps(data), headers=headers)
+        r = requests.post("https://www.eigenkarma.net:31415/vote", data=json.dumps(data), headers=headers)
         if r.status_code != 200:
             await send_dm(member, f"Error casting vote: `{r.text}` Error Code: `{r.status_code}`.")
             return

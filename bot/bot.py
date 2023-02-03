@@ -165,7 +165,7 @@ class DiscordHandler:
                     await message.channel.send(response)
 
                 elif command.lower() == "list_flavors":
-                    r = requests.get("https://www.eigentrust.net:31415/categories")
+                    r = requests.get("https://www.eigenkarma.net:31415/categories")
                     categories = json.loads(r.text)
                     await message.channel.send("Available Flavors:\n\n" + ("\n".join(categories)))
 
@@ -186,7 +186,7 @@ class DiscordHandler:
                     if emojis.decode(args[0]) == ":mag:":
                         await message.channel.send(f"Error: {args[0]} is a reserved react.")
                         return
-                    r = requests.get("https://www.eigentrust.net:31415/categories")
+                    r = requests.get("https://www.eigenkarma.net:31415/categories")
                     categories = json.loads(r.text)
                     if args[1].lower() not in categories:
                         await message.channel.send(f"Error: The flavor `{args[1]}` does not exist.")

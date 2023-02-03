@@ -71,7 +71,7 @@ def connect() -> Response:
         "Content-Type": "application/json",
     }
     r = requests.post(
-        "https://www.eigentrust.net:31415/register_connection", data=json.dumps(data), headers=headers
+        "https://www.eigenkarma.net:31415/register_connection", data=json.dumps(data), headers=headers
     )
     if r.status_code != 200:
         return Response(r.text, r.status_code)
@@ -123,7 +123,7 @@ def cast_vote() -> Response:
     headers = {
         "Content-Type": "application/json",
     }
-    r = requests.post("https://www.eigentrust.net:31415/vote", data=json.dumps(data), headers=headers)
+    r = requests.post("https://www.eigenkarma.net:31415/vote", data=json.dumps(data), headers=headers)
     if r.status_code != 200:
         return Response(r.text, r.status_code)
     with DatabaseManager() as db:
@@ -148,7 +148,7 @@ def lookup() -> Response:
         "Content-Type": "application/json",
     }
     r = requests.post(
-        "https://www.eigentrust.net:31415/get_vote_count", data=json.dumps(data), headers=headers
+        "https://www.eigenkarma.net:31415/get_vote_count", data=json.dumps(data), headers=headers
     )
     if r.status_code != 200:
         return Response(r.text, r.status_code)
@@ -157,7 +157,7 @@ def lookup() -> Response:
 
     response = {"votes": response_data["votes"]}
 
-    r = requests.post("https://www.eigentrust.net:31415/get_score", data=json.dumps(data), headers=headers)
+    r = requests.post("https://www.eigenkarma.net:31415/get_score", data=json.dumps(data), headers=headers)
     if r.status_code != 200:
         return Response(r.text, r.status_code)
     response_data = json.loads(r.text)
