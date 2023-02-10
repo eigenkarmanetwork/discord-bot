@@ -59,7 +59,7 @@ class DiscordHandler:
 
         @self.client.event
         async def on_message(message: discord.message.Message) -> None:
-            if message.clean_content[0:5].lower() == "!etn ":
+            if message.clean_content[0:5].lower() == "!ekn ":
                 is_dm = True
                 admin = False
                 if not isinstance(message.channel, discord.channel.DMChannel):
@@ -74,7 +74,7 @@ class DiscordHandler:
 
                 elif command.lower() == "about":
                     await message.channel.send(
-                        "EigenTrust.Net is your own personal karma system, letting you see what the people you trust think of others. You can allocate trust of different flavors to people using Discord reacts when they do something which you think is good and makes you want to upweight them in the trust graph, both from your personal point of view and from the view of anyone who trusts you."
+                        "EigenKarma.Net is your own personal karma system, letting you see what the people you trust think of others. You can allocate trust of different flavors to people using Discord reacts when they do something which you think is good and makes you want to upweight them in the trust graph, both from your personal point of view and from the view of anyone who trusts you."
                     )
                     return
 
@@ -265,13 +265,13 @@ class DiscordHandler:
                                 await message.channel.send("Attempts to give help for any given command.")
                             case "add_trust_react":
                                 await message.channel.send(
-                                    "Adds a reaction to use for trust.\nUsage: !etn add_trust_react <emoji> <flavor>"
+                                    "Adds a reaction to use for trust.\nUsage: !ekn add_trust_react <emoji> <flavor>"
                                 )
                             case "list_trust_reacts":
                                 await message.channel.send("Lists all reactions used for trust.")
                             case "remove_trust_react" | "delete_trust_react":
                                 await message.channel.send(
-                                    "Removes a reaction to use for trust.\nUsage: !etn remove_trust_react <emoji>"
+                                    "Removes a reaction to use for trust.\nUsage: !ekn remove_trust_react <emoji>"
                                 )
                             case _:
                                 await message.channel.send(f"No help for: `{args[0]}`")

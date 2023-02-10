@@ -18,12 +18,12 @@ async def join_message(guild: discord.guild.Guild) -> None:
         use_channel = channels[0]
 
     await use_channel.send(
-        "Thank you for adding the ETN Discord Bot!\n"
-        + "Please use `!etn add_trust_react <emoji> <flavor>` to configure your server.\n"
+        "Thank you for adding the EKN Discord Bot!\n"
+        + "Please use `!ekn add_trust_react <emoji> <flavor>` to configure your server.\n"
         + "\n"
-        + "For a list of flavors, please use `!etn list_flavors`.\n"
-        + "To change who can edit the ETN bot please use `!etn add_admin_role <role mention>`.\n"
-        + "For a list of other commands, please use `!etn help`."
+        + "For a list of flavors, please use `!ekn list_flavors`.\n"
+        + "To change who can edit the EKN bot please use `!ekn add_admin_role <role mention>`.\n"
+        + "For a list of other commands, please use `!ekn help`."
     )
 
 
