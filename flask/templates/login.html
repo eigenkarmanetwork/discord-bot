@@ -29,14 +29,14 @@
                         document.getElementById("notice").style = "color: red;";
                     }else if(this.readyState == 4 && this.status == 404){
                         document.getElementById("notice").innerHTML = this.responseText;
-                        document.getElementById("notice").innerHTML += " <a href='https://discord.com/api/oauth2/authorize?client_id=999817950880075949&redirect_uri=http%3A%2F%2Fdiscord.eigentrust.net%2Fauthorize_discord&response_type=code&scope=identify'>Click here to restart.</a>";
+                        document.getElementById("notice").innerHTML += " <a href='https://discord.com/api/oauth2/authorize?client_id=999817950880075949&redirect_uri=http%3A%2F%2Fdiscord.eigenkarma.net%2Fauthorize_discord&response_type=code&scope=identify'>Click here to restart.</a>";
                         document.getElementById("notice").style = "color: red;";
                     }else if(this.readyState == 4) {
                         document.getElementById("notice").innerHTML = "An unknown error occurred...";
                         document.getElementById("notice").style = "color: red;";
                     }
                 }
-                xhttp.open("POST", "http://discord.eigentrust.net/connect", true);
+                xhttp.open("POST", "http://discord.eigenkarma.net/connect", true);
                 xhttp.setRequestHeader("Content-type", "application/json");
                 xhttp.setRequestHeader("Accept", "text/plain");
                 xhttp.send(JSON.stringify(data));
@@ -62,7 +62,7 @@
         {% extends "template.html" %}
         {% block content %}
 
-        <p>Would you like to pair ETN and Discord?  If so, please sign in:</p>
+        <p>Would you like to pair EKN and Discord?  If so, please sign in:</p>
         <span id="notice"></span>
         <table>
             <tr>

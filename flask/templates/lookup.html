@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>View Trust Score</title>
+        <title>Lookup User</title>
         <script>
             function getUrlParameters() {
                 var out = {};
@@ -36,7 +36,7 @@
                         document.getElementById("notice").style = "color: red;";
                     }
                 }
-                xhttp.open("POST", "http://discord.eigentrust.net/lookup", true);
+                xhttp.open("POST", "http://discord.eigenkarma.net/lookup", true);
                 xhttp.setRequestHeader("Content-type", "application/json");
                 xhttp.setRequestHeader("Accept", "text/plain");
                 xhttp.send(JSON.stringify(data));
